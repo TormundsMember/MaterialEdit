@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    >
+
+
+  <io.github.tormundsmember.materialedittext.MaterialEditText
+      android:layout_width="100dp"
+      android:layout_height="wrap_content"
+
+      android:text="Hello World!"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintLeft_toLeftOf="parent"
+      app:layout_constraintRight_toRightOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:met_floatingLabel="highlight"
+      app:met_floatingLabelAlwaysShown="true"
+      app:met_floatingLabelText="Test"
+      app:met_floatingLabelTextSize="12sp"
+      app:met_helperText="test"
+      app:met_helperTextAlwaysShown="true"
+      app:met_helperTextColor="#08f"
+      app:met_hideUnderline="true"
+      />
+
+</android.support.constraint.ConstraintLayout>

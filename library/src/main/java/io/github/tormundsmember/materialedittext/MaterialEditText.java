@@ -88,6 +88,11 @@ public class MaterialEditText extends AppCompatEditText {
   private int floatingLabelTextColor;
 
   /**
+   * the floating label's alpha when textview is not selected
+   */
+  private float floatingLabelAlpha;
+
+  /**
    * the bottom texts' size.
    */
   private int bottomTextSize;
@@ -404,12 +409,13 @@ public class MaterialEditText extends AppCompatEditText {
         getResources().getDimensionPixelSize(
             R.dimen.floating_label_text_size));
     floatingLabelTextColor = typedArray.getColor(R.styleable.MaterialEditText_met_floatingLabelTextColor, -1);
+    floatingLabelAlpha = typedArray.getFloat(R.styleable.MaterialEditText_met_floatingLabelAlpha, 0.26f);
     floatingLabelAnimating = typedArray.getBoolean(R.styleable.MaterialEditText_met_floatingLabelAnimating, true);
     bottomTextSize = typedArray.getDimensionPixelSize(R.styleable.MaterialEditText_met_bottomTextSize,
         getResources().getDimensionPixelSize(
             R.dimen.bottom_text_size));
     hideUnderline = typedArray.getBoolean(R.styleable.MaterialEditText_met_hideUnderline, false);
-    underlineColor = typedArray.getColor(R.styleable.MaterialEditText_met_underlineColor, -1);
+    underlineColor = typedArray.getColor(R.styleable.MaterialEditText_met_underlineColor, 0);
     autoValidate = typedArray.getBoolean(R.styleable.MaterialEditText_met_autoValidate, false);
     iconLeftBitmaps = generateIconBitmaps(typedArray.getResourceId(R.styleable.MaterialEditText_met_iconLeft, -1));
     iconRightBitmaps = generateIconBitmaps(typedArray.getResourceId(R.styleable.MaterialEditText_met_iconRight, -1));
@@ -960,8 +966,8 @@ public class MaterialEditText extends AppCompatEditText {
 
   private void resetTextColor() {
     if (textColorStateList == null) {
-      textColorStateList = new ColorStateList(new int[][] { new int[] { android.R.attr.state_enabled }, EMPTY_STATE_SET },
-          new int[] { baseColor & 0x00ffffff | 0xdf000000, baseColor & 0x00ffffff | 0x44000000 });
+      textColorStateList = new ColorStateList(new int[][] { new int[] { android.R.attr.state_focused }, new int[] { android.R.attr.state_enabled }, EMPTY_STATE_SET },
+          new int[] { baseColor & 0x00ffffff | 0xff000000, baseColor & 0x00ffffff | 0xDF000000, baseColor & 0x00ffffff | 0x44000000 });
       setTextColor(textColorStateList);
     } else {
       setTextColor(textColorStateList);
@@ -987,6 +993,7 @@ public class MaterialEditText extends AppCompatEditText {
 
   private void resetHintTextColor() {
     if (textColorHintStateList == null) {
+//      setHintTextColor(baseColor & 0x00ffffff | 0x44000000);
       setHintTextColor(baseColor & 0x00ffffff | 0x44000000);
     } else {
       setHintTextColor(textColorHintStateList);
@@ -1321,23 +1328,23 @@ public class MaterialEditText extends AppCompatEditText {
       canvas.drawBitmap(clearButtonBitmap, buttonLeft, iconTop, paint);
     }
 
-    // draw the underline
+    // draw the underline (underlineColor is only used when focused)
     if (!hideUnderline) {
       lineStartY += bottomSpacing;
       if (!isInternalValid()) { // not valid
         paint.setColor(errorColor);
         canvas.drawRect(startX, lineStartY, endX, lineStartY + getPixel(2), paint);
       } else if (!isEnabled()) { // disabled
-        paint.setColor(underlineColor != -1 ? underlineColor : baseColor & 0x00ffffff | 0x44000000);
+        paint.setColor(baseColor & 0x00ffffff | 0x44000000);
         float interval = getPixel(1);
         for (float xOffset = 0; xOffset < getWidth(); xOffset += interval * 3) {
           canvas.drawRect(startX + xOffset, lineStartY, startX + xOffset + interval, lineStartY + getPixel(1), paint);
         }
       } else if (hasFocus()) { // focused
-        paint.setColor(primaryColor);
+        paint.setColor(underlineColor != 0 ? underlineColor : primaryColor);
         canvas.drawRect(startX, lineStartY, endX, lineStartY + getPixel(2), paint);
       } else { // normal
-        paint.setColor(underlineColor != -1 ? underlineColor : baseColor & 0x00ffffff | 0x1E000000);
+        paint.setColor(baseColor & 0x00ffffff | 0xDF000000);
         canvas.drawRect(startX, lineStartY, endX, lineStartY + getPixel(1), paint);
       }
     }
@@ -1375,7 +1382,8 @@ public class MaterialEditText extends AppCompatEditText {
       textPaint.setTextSize(floatingLabelTextSize);
       // calculate the text color
       textPaint.setColor((Integer) focusEvaluator.evaluate(focusFraction * (isEnabled() ? 1 : 0),
-          floatingLabelTextColor != -1 ? floatingLabelTextColor : (baseColor & 0x00ffffff | 0x44000000), primaryColor));
+          floatingLabelTextColor != -1 ? floatingLabelTextColor : (baseColor & 0x00ffffff | 0x44000000),
+              floatingLabelTextColor != -1 ? floatingLabelTextColor : primaryColor));
 
       // calculate the horizontal position
       float floatingLabelWidth = textPaint.measureText(floatingLabelText.toString());
@@ -1396,8 +1404,10 @@ public class MaterialEditText extends AppCompatEditText {
               + getScrollY());
 
       // calculate the alpha
-      int alpha = ((int) ((floatingLabelAlwaysShown ? 1 : floatingLabelFraction) * 0xff * (0.74f * focusFraction * (isEnabled() ? 1 : 0) + 0.26f) * (
-          floatingLabelTextColor != -1 ? 1 : Color.alpha(floatingLabelTextColor) / 255f)));
+      int alpha = ((int) ((floatingLabelAlwaysShown ? 1 : floatingLabelFraction) * 0xff * ((1f - floatingLabelAlpha) * focusFraction * (isEnabled() ? 1 : 1) + floatingLabelAlpha) * (
+                floatingLabelTextColor != -1 ? 1 : Color.alpha(floatingLabelTextColor) / 255f)));
+
+
       textPaint.setAlpha(alpha);
 
       // draw the floating label

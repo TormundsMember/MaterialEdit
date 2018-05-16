@@ -36,6 +36,7 @@
     <attr format="color" name="met_textColorHint"/>
     <attr format="boolean" name="met_validateOnFocusLost"/>
     <attr format="boolean" name="met_checkCharactersCountAtBeginning"/>
+    <attr format="float" name="met_floatingLabelAlpha"/>
 
   </declare-styleable>
 </resources>
